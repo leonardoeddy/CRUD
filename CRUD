@@ -1,0 +1,75 @@
+// Función para buscar un producto por su código
+fun buscar(view: View) {
+    val con = SQLite(this, "tienda", null, 1)
+    val baseDatos = con.writableDatabase
+    val codigo = txtCodigo?.text.toString()
+
+    if (codigo.isNotEmpty()) {
+        val fila = baseDatos.rawQuery(
+            "SELECT descripcion, precio FROM productos WHERE codigo = '$codigo'",
+            null
+        )
+        if (fila.moveToFirst()) {
+            txtDescripcion?.setText(fila.getString(0))
+            txtPrecio?.setText(fila.getString(1))
+        } else {
+            txtDescripcion?.setText("")
+            txtPrecio?.setText("")
+            Toast.makeText(this, "No se encontraron registros", Toast.LENGTH_LONG).show()
+        }
+        baseDatos.close()
+    } else {
+        Toast.makeText(this, "Ingrese un código para buscar", Toast.LENGTH_LONG).show()
+    }
+}
+
+
+// Función para eliminar un producto por su código
+fun eliminar(view: View) {
+    val con = SQLite(this, "tienda", null, 1)
+    val baseDatos = con.writableDatabase
+    val codigo = txtCodigo?.text.toString()
+
+    if (codigo.isNotEmpty()) {
+        val cant = baseDatos.delete("productos", "codigo='$codigo'", null)
+        if (cant > 0) {
+            Toast.makeText(this, "El producto fue eliminado", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, "El producto no se encontró", Toast.LENGTH_LONG).show()
+        }
+        txtCodigo?.setText("")
+        txtDescripcion?.setText("")
+        txtPrecio?.setText("")
+    } else {
+        Toast.makeText(this, "El campo código debe tener texto", Toast.LENGTH_LONG).show()
+    }
+}
+
+
+
+
+// Función para editar un producto existente
+fun editar(view: View) {
+    val con = SQLite(this, "tienda", null, 1)
+    val baseDatos = con.writableDatabase
+    val codigo = txtCodigo?.text.toString()
+    val descripcion = txtDescripcion?.text.toString()
+    val precio = txtPrecio?.text.toString()
+
+    if (codigo.isNotEmpty() && descripcion.isNotEmpty() && precio.isNotEmpty()) {
+        val registro = ContentValues().apply {
+            put("codigo", codigo)
+            put("descripcion", descripcion)
+            put("precio", precio)
+        }
+
+        val cant = baseDatos.update("productos", registro, "codigo='$codigo'", null)
+        if (cant > 0) {
+            Toast.makeText(this, "El registro fue actualizado exitosamente", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, "El registro no fue encontrado", Toast.LENGTH_LONG).show()
+        }
+    } else {
+        Toast.makeText(this, "Los campos no pueden estar vacíos", Toast.LENGTH_LONG).show()
+    }
+}
